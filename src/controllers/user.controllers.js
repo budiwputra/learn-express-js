@@ -1,44 +1,71 @@
 const userModel = require('../models/user.model')
+const {successHandler, errorHandler} = require('../utils/helper.responses')
 
 const getAllUsers = async (req, res) => {
+    
     try {
-        const allUsers = await userModel.getAllUsers()
-        return res.status(200).json({
-            status : 200,
-            data : allUsers
-        })
+        const allUser = await userModel.getAllUsers()
+
+        if (!allUser || allUser.length === 0){
+
+            return errorHandler(
+                res, 
+                false, 
+                404, 
+                "Belum ada user terdaftar")}
+
+        return successHandler(
+            res, 
+            true, 
+            200, 
+            "Menampilkan seluruh user", 
+            allUser)
+
     } catch (error) {
-        return res.status(500).json({
-            status : 500,
-            message : `Internal Server Error : ${error.message}`
-        })
-    }
+
+        return errorHandler(
+            res, 
+            false, 
+            500, 
+            `Internal Server Error: ${error.message}`)}
 }
 
 const createUser = async (req, res) => {
     try {
         const {firstName, lastName, email, password } = req.body
 
-        if (!firstName && !lastName && !email && !password) {
-            throw new Error('Pastikan seluruh field terisi')
+        if (!firstName || !lastName || !email || !password) {
+            return errorHandler(
+                res, 
+                false, 
+                400, 
+                "Semua field wajib diisi")
         }
 
         const createdUser = await userModel.createUser(firstName, lastName, email, password)
-        if (!createdUser.affectedRows) {
-            throw new Error('Terjadi kesalahan')
-        }
 
-        return res.status(201).json({
-            status : 201,
-            data : req.body
-        })
+        if (!createdUser.affectedRows) {
+
+            return errorHandler(
+                res, 
+                false, 
+                400, 
+                "Gagal membuat user")}
+
+        return successHandler(
+            res, 
+            true, 
+            201, 
+            "User berhasil dibuat", 
+            {firstName, lastName, email})
 
     } catch (error) {
-        return res.status(500).json({
-            status : 500,
-            message : `Internal Server Error : ${error.message}`
-        })
-    }
+
+        return errorHandler(
+            res, 
+            false, 
+            500, 
+            `Inernal Server Error: ${error.message}`)}
 }
 
 const updateUser = async (req, res) => {
@@ -46,28 +73,38 @@ const updateUser = async (req, res) => {
         const {userId} = req.params
         const {firstName, lastName, email, password} = req.body 
 
-        if (!firstName && !lastName && !email && !password) {
-            throw new Error('Pastikan semua field terisi')
-        }
+        if (!firstName || !lastName || !email || !password) {
+
+            return errorHandler(
+                res, 
+                false, 
+                400, 
+                "Semua field wajib diisi")}
 
         const updatedUser = await userModel.updateUser(userId, firstName, lastName, email, password)
+
         if (!updatedUser.affectedRows) {
-            throw new Error('Terjadi kesalahan')
-        }
+
+            return errorHandler(
+                res, 
+                false, 
+                404, 
+                "Gagal membuat user")}
         
-        return res.status(200).json({
-            status:200,
-            data : {
-                userId,
-                ...req.body
-            }
-        })
+        return successHandler(
+            res, 
+            true, 
+            200, 
+            "User berhasil diperbarui", 
+            {userId, firstName, lastName, email})
+
     } catch (error) {
-        return res.status(500).json({
-            status : 500,
-            message : `Internal Server Error : ${error.message}`
-        })
-    }
+
+        return errorHandler(
+            res, 
+            false, 
+            500, 
+            `Internal Server Error: ${error.message}`)}
 }
 
 const deleteUser = async (req, res) => {
@@ -75,45 +112,56 @@ const deleteUser = async (req, res) => {
         const {userId} = req.params
         
         const deletedUser = await userModel.deleteUser(userId)
-        if (!deletedUser.affectedRows) {
-            throw new Error('Terjadi kesalahan')
-        }
 
-        return res.status(200).json({
-            status : 200,
-            data : {
-                userId
-            }
-        })
+        if (!deletedUser.affectedRows) {
+
+            return errorHandler(
+                res, 
+                false, 
+                404, 
+                "User tidak ditemukan")}
+
+        return successHandler(
+            res, 
+            true, 
+            200, 
+            "User berhasil dihapus", {userId})
 
     } catch (error) {
-        return res.status(500).json({
-            status : 500,
-            message : `Internal Server Error: ${error.message}`
-        })
-    }
+
+        return errorHandler(
+            res, 
+            false, 
+            500, 
+            `Internal Server Error: ${error.message}`)}
 }
 
 const getUserById = async (req, res) => {
     try {
         const user = await userModel.getUserById(req.params.userId)
+
         if (!user || user.length === 0) {
-            return res.status(404).json({
-                succes: false,
-                message: "User tidak ditemukan"
-            })
-        }
-        return res.status(200).json({
-            succes : true,
-            message:"User berhasil ditemukan",
-            data : user
-        })
+
+            return errorHandler(
+                res, 
+                false, 
+                404, 
+                "User tidak ditemukan")}
+
+        return successHandler(
+            res, 
+            true, 
+            200, 
+            "User berhasil ditemukan", 
+            user)
+
     } catch (error) {
-        return res.status(500).json({
-            status : 500,
-            message : `Internal Server Error: ${error.message}`
-        })
-    }
+
+        return errorHandler(
+            res, 
+            false, 
+            500, 
+            `Internal Server Error: ${error.message}`)}
 }
 
 module.exports = {

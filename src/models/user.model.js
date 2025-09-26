@@ -3,7 +3,7 @@ const crypto = require('crypto')
 
 const getAllUsers = () => 
     new Promise((resolve, reject) => {
-        const sql ='SELECT * FROM users'
+        const sql ='SELECT user_id, firstname, lastname, email FROM users'
         connection.query(sql, (err, results) => {
             if (err) {
                 return reject(err)
@@ -52,7 +52,7 @@ const deleteUser = (userId) =>
 
 const getUserById = (userId) => 
     new Promise((resolve, reject) => {
-        const sql = 'SELECT * FROM users WHERE user_id = ?'
+        const sql = 'SELECT user_id, firstname, lastname, email FROM users WHERE user_id = ?'
         const values = [userId]
         connection.query(sql, values, (err, results) => {
             if (err) {

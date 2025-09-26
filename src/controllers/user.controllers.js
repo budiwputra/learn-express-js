@@ -110,6 +110,17 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
     try {
         const {userId} = req.params
+
+        const user = await userModel.getUserById(userId)
+
+        if (!user || user.length === 0) {
+
+            return errorHandler(
+                res, 
+                false, 
+                404, 
+                "User tidak ditemukan")
+        }
         
         const deletedUser = await userModel.deleteUser(userId)
 
@@ -125,7 +136,7 @@ const deleteUser = async (req, res) => {
             res, 
             true, 
             200, 
-            "User berhasil dihapus", {userId})
+            "User berhasil dihapus", {user})
 
     } catch (error) {
 
@@ -138,7 +149,9 @@ const deleteUser = async (req, res) => {
 
 const getUserById = async (req, res) => {
     try {
-        const user = await userModel.getUserById(req.params.userId)
+        const {userId} = req.params
+
+        const user = await userModel.getUserById(userId)
 
         if (!user || user.length === 0) {
 
